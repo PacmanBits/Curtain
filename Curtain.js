@@ -1,11 +1,4 @@
-var Curtain = {
-	Show       : null,
-	Hide       : null,
-	LoadURL    : null,
-	SetContent : null,
-	Clear      : null,
-	SetSize    : null
-};
+var Curtain = {};
 
 (function($)
 {
@@ -21,122 +14,158 @@ var Curtain = {
 		// Alias to place accessible at all levels
 		top.document.CurtainDocTopAlias = Curtain;
 		
-		var curtainEl = $(document.createElement("div"))
+		var curtainer = $(document.createElement("div"))
 			.css({
-				position:        "fixed",
-				top:             "0",
-				left:            "0",
-				right:           "0",
-				bottom:          "0",
-				backgroundColor: "black",
-				opacity:         "0.5",
-				display:         "none",
-				zIndex:          998
+				position      : "fixed" ,
+				top           : "0"     ,
+				left          : "0"     ,
+				right         : "0"     ,
+				bottom        : "0"     ,
+				zIndex        : "999"   ,
+				pointerEvents : "none"
 			})
-			.click(function(){ Curtain.Hide(); })
 		;
 		
-		var frame   = $(document.createElement("div")).css({
-			position:        "fixed",
-			top:             "50%",
-			left:            "50%",
-			transform:       "translate(-50%,-50%)",
-			display:         "none",
-			zIndex:          999
-		});
-		
-		var iFrame  = $(document.createElement("iframe"))
-			.css({
-				width:           "100%",
-				height:          "100%",
-				display:         "none",
-				backgroundColor: "white",
-				border:          "none"
-			})
-			.appendTo(frame)
-		;
-		
-		var contentEl = $(document.createElement("div"))
-			.css({
-				width:           "100%",
-				height:          "100%",
-				display:         "none"
-			})
-			.appendTo(frame)
-		;
+		var curtainStack = [] ;
 		
 		var defaultOptions = {
-			width   : "auto" ,
-			height  : "auto" ,
-			URL     : null   ,
-			content : null
+			width       : "auto"  ,
+			height      : "auto"  ,
+			background  : "white" ,
+			scrimCloses : true
+		};
+		
+		var defaultAlertButtons = {
+			okay : function()
+			{
+				this.Close();
+			}
+		};
+		
+		Curtain.Open = function(content, options)
+		{
+			var crt = new CurtainObj(content, options);
+			curtainStack.push(crt);
+			return crt;
+		};
+		
+		Curtain.OpenURL = function(URL, options)
+		{
+			Curtain.Open(
+				$(document.createElement("iframe"))
+					.attr("src", URL)
+					.css({
+						position : "absolute" ,
+						width    : "100%"     ,
+						height   : "100%"     ,
+						border   : "none"
+					})
+			, options);
 		}
 		
-		Curtain.Show = function(options)
+		/*
+		Curtain.Alert = function(text, buttons)
 		{
-			var opts = $.extend({}, defaultOptions, options);
+			var bts = $.extend({}, defaultAlertButtons, buttons);
 			
-			if(opts.URL)
-				LoadURL(opts.URL);
-			else if(opts.content)
-				SetContent(opts.content);
+			var btnEl = $(document.createElement("div"));
 			
-			SetSize(opts.width, opts.height);
+			var cont = $(document.createElement("div"), { width : "400px", scrimCloses : false })
+				.append("<div>" + text + "</div>")
+				.append(btnEl)
+				.css({
+					fontFamily : "Arial,sans-serif" ,
+					color      : "#666"
+				})
+			;
 			
-			curtainEl.show();
-			frame.show();
-		}
+			var ctn = Curtain.Open(cont);
+			
+			for(b in bts)
+			{
+				$(document.createElement("div"))
+					.text(b)
+					.click(function()
+					{
+						bts[b].apply(ctn);
+					})
+					.appendTo(btnEl)
+					.css({
+						display : "inline-block" ,
+						cursor  : "pointer"
+					})
+				;
+			}
+		};
+		*/
 		
-		Curtain.Hide = function()
+		Curtain.CloseAll = function()
 		{
-			Clear();
+			for(var c = 0; c < curtainStack.length; c++)
+				curtainStack[c].Close();
 			
-			curtainEl.hide();
-			frame.hide();
-		}
-		
-		function LoadURL(URL)
-		{
-			iFrame.hide();
-			iFrame.attr("src", URL);
-			
-			contentEl.hide();
-			iFrame.show();
-	//		iFrame.load(function()
-	//		{
-	//			$(this).fadeIn(10000);
-	//		});
-		}
-		
-		function SetContent(content)
-		{
-			contentEl.append($(content));
-			
-			contentEl.show();
-			iFrame.hide();
-		}
-		
-		function SetSize(width, height)
-		{
-			frame.css({
-				width  : width,
-				height : height
-			});
-		}
-		
-		function Clear()
-		{
-			iFrame.attr("src", "");
-			contentEl.empty();
-			
-			contentEl.hide();
-			iFrame.hide();
+			curtainStack = [];
 		}
 		
 		$(function()
 		{
-			curtainEl.appendTo($("body"));
-			frame.appendTo($("body"));
+			curtainer.appendTo($("body"));
 		});
+		
+		function CurtainObj(content, options)
+		{
+			var me = this;
+			var opts = $.extend({}, defaultOptions, options);
+			
+			var el = $(document.createElement("div"))
+				.css({
+					position      : "fixed" ,
+					top           : "0"     ,
+					left          : "0"     ,
+					right         : "0"     ,
+					bottom        : "0"     ,
+					pointerEvents : "auto"
+				})
+				.appendTo(curtainer)
+			;
+			
+			var scrim = $(document.createElement("div"))
+				.css({
+					position        : "absolute" ,
+					top             : "0"        ,
+					left            : "0"        ,
+					right           : "0"        ,
+					bottom          : "0"        ,
+					backgroundColor : "black"    ,
+					opacity         : "0.5"
+				})
+				.appendTo(el)
+			;
+			
+			if(opts.scrimCloses)
+				scrim.click(function(){ me.Close(); });
+			
+			var frame   = $(document.createElement("div"))
+				.css({
+					position   : "fixed"                ,
+					top        : "50%"                  ,
+					left       : "50%"                  ,
+					transform  : "translate(-50%,-50%)" ,
+					background : opts.background        ,
+					width      : opts.width             ,
+					height     : opts.height
+				})
+				.appendTo(el)
+				.append(content)
+			;
+			
+			this.Close = function()
+			{
+				el.remove()  ;
+				opts  = null ;
+				scrim = null ;
+				frame = null ;
+			};
+		}
 	}
 })(jQuery)
