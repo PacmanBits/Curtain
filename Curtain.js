@@ -35,16 +35,11 @@ var Curtain = {};
 			scrimCloses : true
 		};
 		
-		var defaultURLOptions = { // iFrame will just collapse to 0x0 if we don't specify a size, so for URL boxes we'll default some arbitrary dimensions
-			width       : "300px" ,
-			height      : "300px"
-		};
-		
-		var defaultAlertOptions = {
-			buttons : [
-				{ text : "okay", click : function() { this.Close(); } }
-			],
-			contentType : "text"
+		var defaultAlertButtons = {
+			okay : function()
+			{
+				this.Close();
+			}
 		};
 		
 		Curtain.Open = function(content, options)
@@ -56,8 +51,6 @@ var Curtain = {};
 		
 		Curtain.OpenURL = function(URL, options)
 		{
-			var opts = $.extend({}, defaultURLOptions, options);
-			
 			Curtain.Open(
 				$(document.createElement("iframe"))
 					.attr("src", URL)
@@ -67,12 +60,12 @@ var Curtain = {};
 						height   : "100%"     ,
 						border   : "none"
 					})
-			, opts);
+			, options);
 		}
 		
-		Curtain.Alert = function(text, options)
+		Curtain.Alert = function(text, buttons)
 		{
-			var opts = $.extend({}, defaultAlertOptions, options);
+			var bts = $.extend({}, defaultAlertButtons, buttons);
 			
 			var btnEl = $(document.createElement("div"))
 				.css({
@@ -82,16 +75,12 @@ var Curtain = {};
 			;
 			
 			var textEl = $(document.createElement("div"))
+				.append(text)
 				.css({
 					textAlign : "center",
 					padding   : "20px"
 				})
 			;
-			
-			if(opts.contentType == "text")
-				textEl.text(text).css("whiteSpace", "pre");
-			else
-				textEl.html(text);
 			
 			var cont = $(document.createElement("div"))
 				.append(textEl)
@@ -104,32 +93,25 @@ var Curtain = {};
 			
 			var ctn = Curtain.Open(cont, { width : "400px", scrimCloses : false });
 			
-			// buttons are floated right, so we should add them in reverse order
-			for(var b = opts.buttons.length - 1; b >= 0; b--)
+			for(b in bts)
 			{
-				(function(btn) // closure to preserve scope on btn for click event later
-				{
-					$(document.createElement("div"))
-						.text(btn.text)
-						.click(function()
-						{
-							var ret = btn.click.apply(ctn);
-							
-							if(opts.callback)
-								opts.callback(ret);
-						})
-						.appendTo(btnEl)
-						.css({
-							float       : "right"                ,
-							cursor      : "pointer"              ,
-							width       : "79px"                 ,
-							border      : "1px #CCC none"        ,
-							borderStyle : "none solid none none" ,
-							padding     : "10px"                 ,
-							textAlign   : "center"
-						})
-					;
-				})(opts.buttons[b]);
+				$(document.createElement("div"))
+					.text(b)
+					.click(function()
+					{
+						bts[b].apply(ctn);
+					})
+					.appendTo(btnEl)
+					.css({
+						float       : "right"                ,
+						cursor      : "pointer"              ,
+						width       : "79px"                 ,
+						border      : "1px #CCC none"        ,
+						borderStyle : "none solid none none" ,
+						padding     : "10px"                 ,
+						textAlign   : "right"
+					})
+				;
 			}
 		};
 		
