@@ -63,15 +63,27 @@ var Curtain = {};
 			, options);
 		}
 		
-		/*
 		Curtain.Alert = function(text, buttons)
 		{
 			var bts = $.extend({}, defaultAlertButtons, buttons);
 			
-			var btnEl = $(document.createElement("div"));
+			var btnEl = $(document.createElement("div"))
+				.css({
+					border      : "1px #CCC none"         ,
+					borderStyle : "solid none none solid"
+				})
+			;
 			
-			var cont = $(document.createElement("div"), { width : "400px", scrimCloses : false })
-				.append("<div>" + text + "</div>")
+			var textEl = $(document.createElement("div"))
+				.append(text)
+				.css({
+					textAlign : "center",
+					padding   : "20px"
+				})
+			;
+			
+			var cont = $(document.createElement("div"))
+				.append(textEl)
 				.append(btnEl)
 				.css({
 					fontFamily : "Arial,sans-serif" ,
@@ -79,7 +91,7 @@ var Curtain = {};
 				})
 			;
 			
-			var ctn = Curtain.Open(cont);
+			var ctn = Curtain.Open(cont, { width : "400px", scrimCloses : false });
 			
 			for(b in bts)
 			{
@@ -91,13 +103,17 @@ var Curtain = {};
 					})
 					.appendTo(btnEl)
 					.css({
-						display : "inline-block" ,
-						cursor  : "pointer"
+						float       : "right"                ,
+						cursor      : "pointer"              ,
+						width       : "79px"                 ,
+						border      : "1px #CCC none"        ,
+						borderStyle : "none solid none none" ,
+						padding     : "10px"                 ,
+						textAlign   : "right"
 					})
 				;
 			}
 		};
-		*/
 		
 		Curtain.CloseAll = function()
 		{
