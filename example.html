@@ -2,27 +2,85 @@
 	<head>
 		<script src="jquery.js"></script>
 		<script src="Curtain.js"></script>
+		<style>
+			body
+			{
+				font-family: Arial,sans-serif;
+				background:  #333;
+			}
+			
+			.button
+			{
+				float:       left;
+				padding:     20px;
+				margin:      10px;
+				background:  #666;
+				color:       orange;
+				font-weight: bold;
+				cursor:      pointer;
+			}
+		</style>
 		<script>
 			$(function()
 			{
-				$("<div>")
+				$("#NormalContent")
 					.click(function()
 					{
 						Curtain.Open($(document.createElement("div")).css("color", "green").text("Hello World"));
 					})
-					.css({
-						float: "left",
-						padding: "20px",
-						background: "#333",
-						color: "orange",
-						fontWeight: "bold"
+				;
+				
+				$("#URLContent")
+					.click(function()
+					{
+						Curtain.OpenURL("http://www.csszengarden.com/", { width : "75%", height : "75%" });
 					})
-					.text("Press Me")
-					.appendTo($("body"))
+				;
+				
+				$("#SimpleAlert")
+					.click(function()
+					{
+						Curtain.Alert("Some Alert Text\r\nAnother Line of Alert Text");
+					})
+				;
+				
+				$("#ComplexAlert")
+					.click(function()
+					{
+						Curtain.Alert("<p>Alert text in 'p' tags</p><p>another paragraph</p>", {
+							buttons : [
+								{
+									text  : "Button 1",
+									click : function()
+									{
+										this.Close();
+										return "Button 1 pressed";
+									}
+								},
+								{
+									text  : "Button 2",
+									click : function()
+									{
+										this.Close();
+										return "Button 2 pressed";
+									}
+								},
+							],
+							callback : function(val)
+							{
+								alert(val);
+							},
+							contentType : "html"
+						});
+					})
 				;
 			});
 		</script>
 	</head>
 	<body>
+		<div class="button" id="NormalContent" >Normal Content</div>
+		<div class="button" id="URLContent"    >URL Content</div>
+		<div class="button" id="SimpleAlert"   >Simple Alert</div>
+		<div class="button" id="ComplexAlert"  >Complex Alert</div>
 	</body>
 </html>
